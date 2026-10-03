@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MANOFOCUS Attention Quiz</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#fff7f2,#f7e5e2);color:#4b1722;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}
+.card{width:min(620px,100%);background:#fff;border-radius:24px;padding:28px;box-shadow:0 12px 35px rgba(75,23,34,.16)}
+.logo{font-size:30px;font-weight:800;letter-spacing:2px;text-align:center;color:#641d2c}
+.tag{font-size:13px;text-align:center;color:#8b5963;margin:5px 0 24px}
+h1,h2{margin-top:0}
+button,.instagram-btn{display:block;width:100%;border:0;border-radius:14px;padding:14px 16px;font-size:16px;font-weight:700;cursor:pointer;text-decoration:none;text-align:center}
+.diff{background:#641d2c;color:white;margin:10px 0}
+.option{background:#faf1ef;border:2px solid transparent;color:#4b1722;margin:10px 0;text-align:left}
+.option.selected{border-color:#641d2c;background:#f2dce0}
+#submit,.instagram-btn{background:#641d2c;color:white;margin-top:18px}
+#next{background:#8b5963;color:white;margin-top:12px}
+.hidden{display:none!important}
+.feedback{margin-top:20px;padding:20px;border-radius:16px;text-align:center}
+.feedback.correct{background:#eaf7ed}
+.feedback.wrong{background:#fff0f0}
+.answer{font-weight:700;margin-top:8px}
+.instagram-btn{margin-top:16px}
+.progress{font-size:13px;color:#8b5963;margin-bottom:10px}
+.question{font-size:21px;font-weight:700;line-height:1.4;margin-bottom:16px}
+.small{font-size:13px;color:#8b5963;text-align:center;margin-top:18px}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">MANOFOCUS</div>
+  <div class="tag">From Distraction to Direction</div>
+
+  <div id="difficulty">
+    <h1>Test Your Attention</h1>
+    <p>Choose your difficulty to get one random question.</p>
+    <button class="diff" onclick="startQuiz('easy')">Easy</button>
+    <button class="diff" onclick="startQuiz('hard')">Hard</button>
+  </div>
+
+  <div id="quiz" class="hidden">
+    <div class="progress" id="difficultyLabel"></div>
+    <div class="question" id="question"></div>
+    <div id="options"></div>
+    <button id="submit" onclick="check()">Submit Answer</button>
+    <div id="feedback" class="feedback hidden"></div>
+    <button id="next" class="hidden" onclick="location.reload()">Try Another Question</button>
+  </div>
+
+  <div class="small">One scan. One random question. How well do you remember?</div>
+</div>
+
+<script>
+const questions = {
+  easy: [
+    ["What quality helped Varadaraj overcome his initial difficulties in learning?",["Wealth","Luck","Continuous practice","Competition"],2],
+    ["According to Swami Haridas, music is not merely practice but:",["Competition","Sadhana","Entertainment","Performance"],1],
+    ["Who inspired Shivaji Maharaj to uphold courage, justice and respect for women?",["Rani Lakshmibai","Jijabai","Savitribai Phule","Ahilyabai Holkar"],1],
+    ["What message did Vivekananda carry to the world in the play?",["Universal brotherhood","Military strength","Material prosperity","Political power"],0],
+    ["What was Savitribai Phule's major contribution highlighted in the play?",["Promoting women's education","Leading a military campaign","Promoting classical music","Establishing a kingdom"],0],
+    ["What does Gandhiji's “Nayi Taleem” emphasise in the play?",["Only academic examinations","Labour, skill development and self-reliance","Competition and ranking","Only theoretical knowledge"],1]
+  ],
+  hard: [
+    ["Who was Swami Vivekananda's guru?",["Swami Haridas","Ramakrishna Paramahansa","Swami Dayanand Saraswati","Swami Shraddhanand"],1],
+    ["Who was one of India's first women teachers?",["Sarojini Naidu","Savitribai Phule","Rani Lakshmibai","Annie Besant"],1],
+    ["Who was the mother of Shivaji Maharaj?",["Jijabai","Ahilyabai Holkar","Rani Lakshmibai","Savitribai Phule"],0],
+    ["In which city did Swami Vivekananda deliver his famous 1893 speech?",["London","Chicago","Delhi","Mumbai"],1],
+    ["Who founded the Vishva-Bharati University at Santiniketan?",["Mahatma Gandhi","Rabindranath Tagore","Swami Vivekananda","Swami Dayanand Saraswati"],1],
+    ["Who is known as the author of the Arthashastra?",["Chanakya","Panini","Aryabhata","Tansen"],0]
+  ]
+};
+
+let q = null;
+let selected = null;
+
+function startQuiz(level){
+  const set = questions[level];
+  q = set[Math.floor(Math.random()*set.length)];
+  selected = null;
+
+  document.getElementById("difficulty").classList.add("hidden");
+  document.getElementById("quiz").classList.remove("hidden");
+  document.getElementById("difficultyLabel").textContent =
+    level.charAt(0).toUpperCase()+level.slice(1)+" Question";
+  document.getElementById("question").textContent = q[0];
+
+  const options = document.getElementById("options");
+  options.innerHTML = "";
+  q[1].forEach((text,i)=>{
+    const b=document.createElement("button");
+    b.className="option";
+    b.textContent=String.fromCharCode(65+i)+". "+text;
+    b.onclick=()=>selectAnswer(i,b);
+    options.appendChild(b);
+  });
+}
+
+function selectAnswer(i,b){
+  selected=i;
+  document.querySelectorAll(".option").forEach(x=>x.classList.remove("selected"));
+  b.classList.add("selected");
+}
+
+function check(){
+  if(selected===null){
+    alert("Please choose an answer.");
+    return;
+  }
+
+  const good = selected === q[2];
+  const fb = document.getElementById("feedback");
+  fb.className = good ? "feedback correct" : "feedback wrong";
+
+  if(good){
+    fb.innerHTML = `
+      <div style="font-size:38px">✓</div>
+      <h2>You have a great memory!</h2>
+      <p style="line-height:1.5">
+        If you wanna improve your attention span and memory more, follow us on Instagram!
+      </p>
+      <a class="instagram-btn"
+         href="https://www.instagram.com/manofocus._/"
+         target="_blank" rel="noopener noreferrer">
+         Follow @manofocus._ on Instagram
+      </a>`;
+  } else {
+    fb.innerHTML = `
+      <div style="font-size:38px">✕</div>
+      <h2>Oops wrong answer!</h2>
+      <p style="line-height:1.5">
+        If you wanna improve your attention span and memory more, follow us on Instagram!
+      </p>
+      <a class="instagram-btn"
+         href="https://www.instagram.com/manofocus._/"
+         target="_blank" rel="noopener noreferrer">
+         Follow @manofocus._ on Instagram
+      </a>
+      <div style="margin-top:15px">
+        The correct answer is:
+        <div class="answer">
+          ${String.fromCharCode(65+q[2])}. ${q[1][q[2]]}
+        </div>
+      </div>`;
+  }
+
+  fb.classList.remove("hidden");
+  document.getElementById("submit").classList.add("hidden");
+  document.getElementById("next").classList.remove("hidden");
+}
+</script>
+</body>
+</html>
